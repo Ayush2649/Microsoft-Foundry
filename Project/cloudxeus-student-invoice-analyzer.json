@@ -1,0 +1,61 @@
+{
+  "analyzerId": "cloudxeus-student-invoice-analyzer",
+  "description": "Extracts student invoice fields from CloudXeus course purchase invoices.",
+  "baseAnalyzerId": "prebuilt-document",
+  "config": {
+    "returnDetails": true,
+    "enableOcr": true,
+    "enableLayout": true,
+    "estimateFieldSourceAndConfidence": true,
+    "tableFormat": "markdown"
+  },
+  "fieldSchema": {
+    "name": "CloudXeusStudentInvoice",
+    "fields": {
+      "studentName": {
+        "type": "string",
+        "description": "The full name of the student billed on the invoice.",
+        "method": "extract"
+      },
+      "studentEmail": {
+        "type": "string",
+        "description": "The email address of the student or billing contact.",
+        "method": "extract"
+      },
+      "invoiceNumber": {
+        "type": "string",
+        "description": "The unique invoice number, usually starting with INV-CX.",
+        "method": "extract"
+      },
+      "invoiceDate": {
+        "type": "date",
+        "description": "The date when the invoice was issued.",
+        "method": "extract"
+      },
+      "courseCode": {
+        "type": "string",
+        "description": "The certification course code, such as AI-103, AI-901, AZ-104, DP-600, or DP-700.",
+        "method": "extract"
+      },
+      "courseName": {
+        "type": "string",
+        "description": "The course title listed on the invoice.",
+        "method": "extract"
+      },
+      "totalAmount": {
+        "type": "number",
+        "description": "The final total amount charged or due on the invoice.",
+        "method": "extract"
+      },
+      "paymentStatus": {
+        "type": "string",
+        "description": "The payment status, such as Paid, Pending, Failed, or Manual Review Required.",
+        "method": "extract"
+      }
+    }
+  },
+  "models": {
+    "completion": "gpt-5.2",
+    "embedding": "text-embedding-3-large"
+  }
+}

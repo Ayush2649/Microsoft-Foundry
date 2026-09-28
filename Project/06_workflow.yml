@@ -1,0 +1,64 @@
+kind: workflow
+trigger:
+  kind: OnConversationStart
+  id: trigger_wf
+  actions:
+    - kind: InvokeAzureAgent
+      id: node-1783358305763
+      agent:
+        name: CloudXeus-Invoice-Intelligence-Agent
+      conversationId: =System.ConversationId
+      input:
+        messages: |-
+          Analyze the uploaded invoice and extract the key invoice details.
+
+          Return a clear summary that includes:
+          - Vendor name
+          - Invoice number
+          - Invoice date
+          - Due date
+          - Total amount
+          - Tax amount
+          - Line items
+          - Any missing or unusual information
+
+          Also provide a short recommendation on whether the invoice is ready for finance review.
+      output:
+        autoSend: true
+        messages: Local.InvoiceAnalysis
+    - kind: Question
+      id: node-1783358472837
+      variable: Local.ApprovalStatus
+      entity: StringPrebuiltEntity
+      skipQuestionMode: SkipOnFirstExecutionIfVariableHasValue
+      prompt: |-
+        Please review the invoice analysis below:
+
+        {Local.InvoiceAnalysis}
+
+        Type Approved to continue with invoice processing, or Rejected to stop the workflow.
+    - kind: ConditionGroup
+      id: node-1783358631485
+      conditions:
+        - id: condition-approval-approved
+          condition: =Upper(Trim(Local.ApprovalStatus)) = "APPROVED"
+          actions:
+            - kind: SendActivity
+              id: node-1783358694389
+              activity: |-
+                Invoice processing status: {Upper(Local.ApprovalStatus)}
+
+                The invoice has been approved. The workflow can now continue with invoice processing.
+            - kind: EndConversation
+              id: node-1783358760869
+      elseActions:
+        - kind: SendActivity
+          id: node-rejected-message
+          activity: |-
+            Invoice processing status: {Upper(Local.ApprovalStatus)}
+
+            The invoice was not approved. The workflow has stopped, and no invoice processing action was performed.
+        - kind: EndConversation
+          id: node-1783358767854
+name: cloudxeus-invoice-approval-workflow
+description: Human-in-the-loop workflow that analyzes an invoice, asks for approval, and continues only when the reviewer approves the invoice.
